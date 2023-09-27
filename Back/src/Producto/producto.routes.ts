@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { productoService } from "../Producto/producto.service";
+import mongoose from "mongoose";
 
 // enrutado los productos
 // traigo el servicio de producto
@@ -43,19 +44,20 @@ function routerProductos (productoService:productoService){
         }
     })
 
-    productRouter.delete('/', async (req, res) => {
-        const id = req.body.id;
+    productRouter.delete('/:id', async (req, res) => {
+        const {id} = req.params;
         try {
-            const productoDelete = await productoService.delete(id);
-            return res.status(200).json({
-                msg:'Producto eliminado',
-                productoDelete
-            });
-        } catch (err) {
-            console.log("clg error ",err)
-            return res.status(500).json({
-                msg: 'Error al eliminar el producto'
-            });
+            const isValidObjectId = mongoose.isValidObjectId(id);
+    
+            if (!isValidObjectId) {
+                return res.status(400).json({ error: 'ID inválido' });
+            }
+    
+            const borrarProducto = await productoService.delete(id);
+            res.status(201).json(borrarProducto);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error interno del servidor' });
         }
       })
 

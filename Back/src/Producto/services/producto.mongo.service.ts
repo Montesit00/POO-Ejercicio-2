@@ -46,4 +46,17 @@ export class productoServiceMongo implements productoService {
             throw new Error(`Error al eliminar el producto`);
         }
     };
+
+    async actualiar_Stock(id: string, stock: number): Promise<Producto | null> {
+        try {
+            const nuevoStock = await this.modelo.findByIdAndUpdate(id,{
+                stock: stock
+            },{new: true});
+            console.log('Stock actualizado', nuevoStock);
+            return nuevoStock || null;
+        }catch (error) {
+            console.error('Error al actualizar Stock'+error);
+            throw error;
+        }
+    };
 };
