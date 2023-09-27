@@ -14,12 +14,22 @@ function App() {
     return setProductos(data.data.todoProductos);
   };
   
-  const deleteProducto = async (index) => {
+  const venderProducto = async (id)=>{
     try {
-      await axios.delete(`${baseUrl}/`);
-      setProductos((prevProductos) => prevProductos.filter((_, i) => i !== index));
+      const productos={productos:[{producto:id, cantidad:1}]}
+      await axios.post('http://localhost:3000/crear',productos)
+      fetchProductos()
     } catch (error) {
-      console.error('Error al eliminar producto:', error);
+      console.log(error);
+    }
+  }
+
+  const deleteProducto = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/${id}`)
+      fetchProductos()
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -48,7 +58,7 @@ function App() {
                   <th>Marca</th>
                   <th>Precio</th>
                   <th>Stock</th>
-                  <th>Acciones</th>
+                  <th colSpan={2}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,7 +68,8 @@ function App() {
                     <td>{product.marca}</td>
                     <td>{product.precio}</td>
                     <td>{product.stock}</td>
-                    <td><button type="button" className="btn btn-danger" onClick={() => deleteProducto(i)}>Eliminar</button></td>
+                    <td><button type='button' className="btn btn-success" onClick={()=>venderProducto(product._id)}>Comprar</button></td>
+                    <td><button type="button" className="btn btn-danger" onClick={() => deleteProducto(product._id)}>Eliminar</button></td>
                   </tr>
                 ))}
               </tbody>
