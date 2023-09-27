@@ -4,35 +4,52 @@ import axios from 'axios';
 
 function App() {
   const [producto,setProductos] = useState([]);
+  const [nuevoProducto, setNuevoProducto] = useState({ nombre: '', marca: '', precio: 0, stock: 0 });
 
   const baseUrl = "http://localhost:3000";
 
-  const fetch = async () => {
+  const fetchProductos = async () => {
     const data = await axios.get(baseUrl);
 
     return setProductos(data.data.todoProductos);
-  }
+  };
   
-  const deleteProducto = (index) => {
-    setProductos((product) => product.filter((_, i) => i !== index));
+  const deleteProducto = async (index) => {
+    try {
+      await axios.delete(`${baseUrl}/`);
+      setProductos((prevProductos) => prevProductos.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+    }
+  };
+
+  const agregarProducto = async (nuevoProducto) => {
+    try {
+      const response = await axios.post(`${baseUrl}/`, nuevoProducto);
+      setProductos((prevProductos) => [...prevProductos, response.data.nuevoProducto]);
+    } catch (error) {
+      console.error('Error al agregar producto:', error);
+    }
   };
 
   useEffect(()=>{
-    fetch();
+    fetchProductos();
   },[]);
   
-
   return (
     <>
       <div className='container'>
-        <h1>POO - Ejercicio 2</h1>
+        <h1 style={{margin:10}}>POO - Ejercicio 2</h1>
           <div className='table-responsive'>
             <table>
               <thead style={{backgroundColor: "#ccc"}}>
-                <th>Nombre</th>
-                <th>Marca</th>
-                <th>Precio</th>
-                <th>Stock</th>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Marca</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Acciones</th>
+                </tr>
               </thead>
               <tbody>
                 {producto.map((product,i)=>(
@@ -41,16 +58,16 @@ function App() {
                     <td>{product.marca}</td>
                     <td>{product.precio}</td>
                     <td>{product.stock}</td>
+                    <td><button type="button" className="btn btn-danger" onClick={() => deleteProducto(i)}>Eliminar</button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className='botones'>
-              <button type="button" className="btn btn-danger">Eliminar</button>
-              <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar</button>
+              <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" style={{margin:'10px'}}>Agregar</button>
           </div>
-          <div className="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
@@ -59,25 +76,58 @@ function App() {
                 </div>
                 <div className="modal-body">
                   <div className="form-floating mb-3">
-                    <input type="email" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-                    <label for="floatingInput">Nombre</label>
+                    <input 
+                      type="nombre" 
+                      className="form-control" 
+                      id="floatingInput" 
+                      placeholder="Notebook"
+                      onChange={(e) => setNuevoProducto({ ...nuevoProducto, nombre: e.target.value })}  
+                    />
+                    <label htmlFor="floatingInput">Nombre</label>
                   </div>
-                  <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password"/>
-                    <label for="floatingPassword">Marca</label>
+                  <div className="form-floating mb-3">
+                    <input 
+                      type="marca" 
+                      className="form-control" 
+                      id="floatingInput" 
+                      placeholder="Red Dragon"
+                      onChange={(e) => setNuevoProducto({ ...nuevoProducto, marca: e.target.value })}  
+                    />
+                    <label htmlFor="floatingPassword">Marca</label>
                   </div>
-                  <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password"/>
-                    <label for="floatingPassword">Precio</label>
+                  <div className="form-floating mb-3">
+                    <input 
+                    type="precio" 
+                    className="form-control" 
+                    id="floatingInput" 
+                    placeholder="200000"
+                    onChange={(e) => setNuevoProducto({ ...nuevoProducto, precio: e.target.value })}
+                  />
+                    <label htmlFor="floatingPassword">Precio</label>
                   </div>
-                  <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password"/>
-                    <label for="floatingPassword">Stock</label>
+                  <div className="form-floating mb-3">
+                    <input 
+                      type="stock" 
+                      className="form-control" 
+                      id="floatingInput" 
+                      placeholder="10000"
+                      onChange={(e) => setNuevoProducto({ ...nuevoProducto, stock: e.target.value })}
+                    />
+                    <label htmlFor="floatingPassword">Stock</label>
                   </div>
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Atras</button>
-                  <button type="button" className="btn btn-primary">Guardar</button>
+                  <button 
+                    type="button" 
+                    className="btn btn-primary" 
+                    onClick={() => {
+                      agregarProducto(nuevoProducto);
+                      setNuevoProducto({ nombre: '', marca: '', precio: 0, stock: 0 });
+                    }}
+                  >
+                      Guardar
+                  </button>
                 </div>
               </div>
             </div>
